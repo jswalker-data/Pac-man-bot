@@ -26,6 +26,12 @@ UPPER_SUPER1 = np.array([10, 255, 255])
 LOWER_SUPER2 = np.array([160, 150, 150])
 UPPER_SUPER2 = np.array([180, 255, 255])
 
+# Delay before script starting
+START_DELAY = 5.0
+
+# Delay between decision loops (s). Balance speed with CPU usage
+LOOP_TIME = 0.1
+
 
 def screengrab():
     """Screen grab the current game frame as a BRG numpy array"""
@@ -94,3 +100,27 @@ def move_forward(src, dst):
         pyautogui.press("right" if dx > 0 else "left")
     else:
         pyautogui.press("down" if dy > 0 else "up")
+
+
+def main():
+    print(f"Starting in {START_DELAY} seconds... switch to game window")
+    time.sleep(START_DELAY)
+    while True:
+        frame = screengrab()
+        pac_man = find_pacman(frame)
+        if pac_man:
+            coins = find_coins(frame)
+            if coins:
+                # Find distance to coins and pick nearest
+                # Might do a more complex path finding algorithm at a later date
+                dists = [
+                    ((cx - pac_man[0]) ** 2 + (cy - pac_man[1]) ** 2, (cx, cy))
+                    for cx, cy in coins
+                ]
+                _, target = min(dists, key=lambda x: x[0])
+                move_forward(pac_man, target)
+        time.sleep(LOOP_TIME)
+
+
+if __name__ == "__main__":
+    main()
