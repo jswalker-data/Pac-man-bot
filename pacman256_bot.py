@@ -4,11 +4,10 @@ import pyautogui
 import time
 
 # === Config ===
-# 1) Launch the game in a window
+# 1) Launch the game in a window, current setup requires either full screen or the window
+#    to be the full screen
 # 2) Get pixel coordinates (left, top, width, height) of game area
 #    Can use windows in built snipping tool
-
-GAME_WINDOW = (100, 100, 600, 600)  # <- adjust for game window
 
 # HSV colour range for coins and pacman
 # Pac-man (bright yellow)
@@ -35,7 +34,7 @@ LOOP_TIME = 0.1
 
 def screengrab():
     """Screen grab the current game frame as a BRG numpy array"""
-    screen = pyautogui.screenshot(region=GAME_WINDOW)
+    screen = pyautogui.screenshot()
     return cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
 
 
@@ -113,9 +112,13 @@ def main():
             if coins:
                 # Find distance to coins and pick nearest
                 # Might do a more complex path finding algorithm at a later date
+                # coins is type [((x, y), type), ...]
+                # strip out the types
+                coin_positions = [pos for pos, _ in coins]
+                # then do exactly the same as before:
                 dists = [
                     ((cx - pac_man[0]) ** 2 + (cy - pac_man[1]) ** 2, (cx, cy))
-                    for cx, cy in coins
+                    for cx, cy in coin_positions
                 ]
                 _, target = min(dists, key=lambda x: x[0])
                 move_forward(pac_man, target)
